@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <div class="col-lg-2 col-md-3 d-none d-md-block">
+      <div class="admin-sidebar p-3 rounded-4">
+        <div class="text-center mb-4 pt-2">
+          <i class="bi bi-flower1 fs-2 text-success"></i>
+          <div class="text-white fw-semibold small mt-1">Admin Panel</div>
+        </div>
+        <nav class="nav flex-column gap-1">
+          <a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+          <a class="nav-link active" href="{{ url_for('admin.products') }}"><i class="bi bi-box-seam me-2"></i>Products</a>
+          <a class="nav-link" href="{{ url_for('admin.orders') }}"><i class="bi bi-receipt me-2"></i>Orders</a>
+          <hr class="border-secondary" />
+          <a class="nav-link" href="{{ url_for('main.index') }}"><i class="bi bi-house me-2"></i>View Site</a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{{ url_for('admin.products') }}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="section-title mb-0">{{ title }}</h2>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm rounded-4 p-4">
+            <form method="post">
+              {{ form.hidden_tag() }}
+
+              <div class="row g-3">
+                <div class="col-12">
+                  {{ form.name.label(class="form-label fw-semibold") }}
+                  {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                  {% for e in form.name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+
+                <div class="col-12">
+                  {{ form.description.label(class="form-label fw-semibold") }}
+                  {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4) }}
+                  {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                  {{ form.price.label(class="form-label fw-semibold") }}
+                  <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else "")) }}
+                  </div>
+                  {% for e in form.price.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                  {{ form.original_price.label(class="form-label fw-semibold") }}
+                  <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    {{ form.original_price(class="form-control" + (" is-invalid" if form.original_price.errors else "")) }}
+                  </div>
+                  {% for e in form.original_price.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                  {{ form.stock.label(class="form-label fw-semibold") }}
+                  {{ form.stock(class="form-control" + (" is-invalid" if form.stock.errors else "")) }}
+                  {% for e in form.stock.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                  {{ form.unit.label(class="form-label fw-semibold") }}
+                  {{ form.unit(class="form-control" + (" is-invalid" if form.unit.errors else ""), placeholder="e.g. 250g, 1 kg, 500ml") }}
+                  {% for e in form.unit.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                  {{ form.category_id.label(class="form-label fw-semibold") }}
+                  {{ form.category_id(class="form-select" + (" is-invalid" if form.category_id.errors else "")) }}
+                  {% for e in form.category_id.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+                </div>
+
+                <div class="col-12">
+                  {{ form.image_url.label(class="form-label fw-semibold") }}
+                  {{ form.image_url(class="form-control", placeholder="https://...") }}
+                  {% if product and product.image_url %}
+                  <div class="mt-2">
+                    <img src="{{ product.image_url }}" style="height:80px;border-radius:8px;" alt="Current image" />
+                    <small class="text-muted ms-2">Current image</small>
+                  </div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-check form-switch mt-2">
+                    {{ form.is_featured(class="form-check-input") }}
+                    {{ form.is_featured.label(class="form-check-label fw-semibold") }}
+                    <div class="text-muted small">Show on homepage featured section</div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-check form-switch mt-2">
+                    {{ form.is_active(class="form-check-input") }}
+                    {{ form.is_active.label(class="form-check-label fw-semibold") }}
+                    <div class="text-muted small">Visible to customers</div>
+                  </div>
+                </div>
+
+                <div class="col-12 d-flex gap-3 mt-3">
+                  {{ form.submit(class="btn btn-success px-5") }}
+                  <a href="{{ url_for('admin.products') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="col-lg-4">
+          <div class="card border-0 bg-success-subtle rounded-4 p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-lightbulb me-1 text-success"></i>Tips</h6>
+            <ul class="list-unstyled small text-muted">
+              <li class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Use a clear, high-quality image URL.</li>
+              <li class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Set "Original Price" higher than "Price" to show a discount.</li>
+              <li class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Mark as "Featured" to appear on the homepage.</li>
+              <li class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Uncheck "Active" to hide without deleting.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

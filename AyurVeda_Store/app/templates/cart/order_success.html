@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Order Placed!{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="order-success-card card p-5 text-center">
+        <div class="success-icon mb-3">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h2 class="fw-bold text-success mb-2">Order Placed Successfully!</h2>
+        <p class="text-muted lead mb-4">Thank you, <strong>{{ current_user.name.split()[0] }}</strong>! Your order has been received and is being processed.</p>
+
+        <!-- Order Details -->
+        <div class="bg-light rounded-4 p-4 text-start mb-4">
+          <div class="row g-3">
+            <div class="col-6">
+              <small class="text-muted d-block">Order ID</small>
+              <strong>#{{ order.id }}</strong>
+            </div>
+            <div class="col-6">
+              <small class="text-muted d-block">Status</small>
+              <span class="badge bg-warning text-dark">{{ order.status }}</span>
+            </div>
+            <div class="col-6">
+              <small class="text-muted d-block">Payment</small>
+              <strong>{{ order.payment_method }}</strong>
+            </div>
+            <div class="col-6">
+              <small class="text-muted d-block">Total Amount</small>
+              <strong class="text-success">₹{{ "%.0f"|format(order.total) }}</strong>
+            </div>
+            <div class="col-12">
+              <small class="text-muted d-block">Delivery To</small>
+              <strong>{{ order.shipping_address }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div class="text-start mb-4">
+          <h6 class="fw-bold mb-3">Items Ordered</h6>
+          {% for item in order.items %}
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+            <div>
+              <span class="fw-semibold">{{ item.product.name }}</span>
+              <small class="text-muted ms-2">× {{ item.quantity }}</small>
+            </div>
+            <span class="text-success fw-semibold">₹{{ "%.0f"|format(item.subtotal) }}</span>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="alert alert-success-subtle text-success py-2 small rounded-3 mb-4" style="background:#d4edda;">
+          <i class="bi bi-truck me-1"></i>
+          Expected delivery within <strong>3–5 business days</strong>.
+        </div>
+
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+          <a href="{{ url_for('cart.my_orders') }}" class="btn btn-outline-success px-4">
+            <i class="bi bi-bag me-1"></i>View My Orders
+          </a>
+          <a href="{{ url_for('products.list_products') }}" class="btn btn-success px-4">
+            <i class="bi bi-arrow-right me-1"></i>Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

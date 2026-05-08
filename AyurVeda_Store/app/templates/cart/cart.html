@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}My Cart{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="section-title mb-4"><i class="bi bi-cart3 me-2"></i>My Cart</h2>
+
+  {% if items %}
+  <div class="row g-4">
+    <!-- Cart Items -->
+    <div class="col-lg-8">
+      {% for item in items %}
+      <div class="card border-0 shadow-sm mb-3 rounded-4">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3">
+            <img src="{{ item.product.image_url or 'https://placehold.co/80x80/d8f3dc/2d6a4f?text=Img' }}"
+                 class="cart-item-img" alt="{{ item.product.name }}" />
+            <div class="flex-grow-1">
+              <a href="{{ url_for('products.detail', product_id=item.product.id) }}" class="text-decoration-none text-dark">
+                <h6 class="fw-semibold mb-0">{{ item.product.name }}</h6>
+              </a>
+              <small class="text-muted">{{ item.product.category.name }} &bull; {{ item.product.unit }}</small>
+              <div class="mt-1">
+                <span class="price">₹{{ "%.0f"|format(item.product.price) }}</span>
+                {% if item.product.original_price %}
+                <span class="text-muted text-decoration-line-through small ms-1">₹{{ "%.0f"|format(item.product.original_price) }}</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="d-flex flex-column align-items-end gap-2">
+              <!-- Qty update -->
+              <form action="{{ url_for('cart.update_cart', item_id=item.id) }}" method="post" class="d-flex align-items-center gap-1">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-2"
+                        onclick="this.form.quantity.value=Math.max(1,+this.form.quantity.value-1);this.form.submit()">−</button>
+                <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                       class="form-control form-control-sm text-center" style="width:52px" />
+                <button type="button" class="btn btn-outline-secondary btn-sm px-2"
+                        onclick="this.form.quantity.value=+this.form.quantity.value+1;this.form.submit()">+</button>
+              </form>
+              <span class="fw-bold text-success">₹{{ "%.0f"|format(item.subtotal) }}</span>
+              <a href="{{ url_for('cart.remove_from_cart', item_id=item.id) }}"
+                 class="btn btn-outline-danger btn-sm"
+                 onclick="return confirm('Remove this item?')">
+                <i class="bi bi-trash3"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-success mt-2">
+        <i class="bi bi-arrow-left me-1"></i>Continue Shopping
+      </a>
+    </div>
+
+    <!-- Summary -->
+    <div class="col-lg-4">
+      <div class="cart-summary">
+        <h5 class="fw-bold mb-4">Order Summary</h5>
+        {% set count = items|length %}
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Items ({{ count }})</span>
+          <span>₹{{ "%.0f"|format(total) }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Delivery</span>
+          {% if total >= 999 %}
+          <span class="text-success fw-semibold">FREE</span>
+          {% else %}
+          <span>₹49</span>
+          {% endif %}
+        </div>
+        <hr />
+        <div class="d-flex justify-content-between mb-4">
+          <span class="fw-bold fs-5">Total</span>
+          <span class="cart-total">₹{{ "%.0f"|format(total if total >= 999 else total + 49) }}</span>
+        </div>
+        {% if total < 999 %}
+        <div class="alert alert-info py-2 small">
+          <i class="bi bi-info-circle me-1"></i>Add ₹{{ "%.0f"|format(999 - total) }} more for free delivery!
+        </div>
+        {% endif %}
+        <a href="{{ url_for('cart.checkout') }}" class="btn btn-success w-100 btn-lg fw-semibold">
+          <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-cart-x text-muted" style="font-size:5rem;"></i>
+    <h4 class="mt-3 text-muted">Your cart is empty</h4>
+    <p class="text-muted">Looks like you haven't added anything yet.</p>
+    <a href="{{ url_for('products.list_products') }}" class="btn btn-success btn-lg px-5 mt-2">
+      <i class="bi bi-arrow-right me-2"></i>Start Shopping
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

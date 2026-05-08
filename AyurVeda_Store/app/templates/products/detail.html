@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('products.list_products') }}">Products</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('products.list_products', category=product.category.slug) }}">{{ product.category.name }}</a></li>
+      <li class="breadcrumb-item active">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-5">
+    <div class="col-lg-5">
+      <div class="position-relative">
+        {% if product.discount_percent > 0 %}
+        <div class="discount-badge fs-6">{{ product.discount_percent }}% OFF</div>
+        {% endif %}
+        <img src="{{ product.image_url or 'https://placehold.co/600x450/d8f3dc/2d6a4f?text=Product' }}"
+             class="img-fluid rounded-3 shadow" alt="{{ product.name }}" style="width:100%" />
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <small class="text-success fw-semibold">{{ product.category.name }}</small>
+      <h1 class="h2 fw-bold mt-1">{{ product.name }}</h1>
+      <div class="d-flex align-items-center gap-3 my-3">
+        <span class="display-6 fw-bold text-success">₹{{ "%.0f"|format(product.price) }}</span>
+        {% if product.original_price %}
+        <span class="fs-4 text-muted text-decoration-line-through">₹{{ "%.0f"|format(product.original_price) }}</span>
+        <span class="badge bg-danger">{{ product.discount_percent }}% OFF</span>
+        {% endif %}
+      </div>
+      <p class="text-muted">Per {{ product.unit }}</p>
+      <p class="lead">{{ product.description }}</p>
+
+      <div class="d-flex align-items-center gap-2 my-3">
+        {% if product.stock > 10 %}
+        <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i>In Stock ({{ product.stock }} available)</span>
+        {% elif product.stock > 0 %}
+        <span class="badge bg-warning-subtle text-warning"><i class="bi bi-exclamation-circle me-1"></i>Only {{ product.stock }} left!</span>
+        {% else %}
+        <span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-circle me-1"></i>Out of Stock</span>
+        {% endif %}
+      </div>
+
+      {% if product.stock > 0 %}
+      <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="mt-4">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div class="input-group qty-input">
+            <button type="button" class="btn btn-outline-secondary" onclick="changeQty(-1)">-</button>
+            <input type="number" id="quantity" name="quantity" class="form-control text-center" value="1" min="1" max="{{ product.stock }}" />
+            <button type="button" class="btn btn-outline-secondary" onclick="changeQty(1)">+</button>
+          </div>
+          <button type="submit" class="btn btn-success btn-lg px-5">
+            <i class="bi bi-cart-plus me-2"></i>Add to Cart
+          </button>
+        </div>
+      </form>
+      {% endif %}
+
+      <div class="row mt-4 g-3">
+        <div class="col-4 text-center">
+          <i class="bi bi-patch-check text-success fs-3"></i>
+          <p class="small text-muted mb-0 mt-1">Certified<br>Organic</p>
+        </div>
+        <div class="col-4 text-center">
+          <i class="bi bi-truck text-success fs-3"></i>
+          <p class="small text-muted mb-0 mt-1">Free Delivery<br>above ₹999</p>
+        </div>
+        <div class="col-4 text-center">
+          <i class="bi bi-arrow-repeat text-success fs-3"></i>
+          <p class="small text-muted mb-0 mt-1">7-Day<br>Returns</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related %}
+  <div class="mt-5 pt-4 border-top">
+    <h4 class="fw-bold mb-4">You May Also Like</h4>
+    <div class="row g-4">
+      {% for p in related %}
+      <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="product-card card border-0 shadow-sm h-100">
+          <a href="{{ url_for('products.detail', product_id=p.id) }}">
+            <img src="{{ p.image_url or 'https://placehold.co/400x300/d8f3dc/2d6a4f?text=Product' }}" class="card-img-top product-img" alt="{{ p.name }}" />
+          </a>
+          <div class="card-body">
+            <h6 class="card-title fw-semibold">{{ p.name }}</h6>
+            <span class="price">₹{{ "%.0f"|format(p.price) }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function changeQty(delta) {
+  const input = document.getElementById('quantity');
+  const val = parseInt(input.value) + delta;
+  const max = parseInt(input.max);
+  if (val >= 1 && val <= max) input.value = val;
+}
+</script>
+{% endblock %}

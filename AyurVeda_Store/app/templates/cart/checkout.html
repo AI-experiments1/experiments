@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('cart.view_cart') }}">Cart</a></li>
+      <li class="breadcrumb-item active">Checkout</li>
+    </ol>
+  </nav>
+
+  <h2 class="section-title mb-4">Secure Checkout</h2>
+
+  <div class="row g-4">
+    <!-- Checkout Form -->
+    <div class="col-lg-7">
+      <form method="post">
+        {{ form.hidden_tag() }}
+
+        <!-- Delivery Details -->
+        <div class="checkout-card card p-4 mb-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt me-2 text-success"></i>Delivery Details</h5>
+          <div class="mb-3">
+            {{ form.name.label(class="form-label fw-semibold") }}
+            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="Full name") }}
+            {% for e in form.name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.phone.label(class="form-label fw-semibold") }}
+            {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="+91-XXXXXXXXXX") }}
+            {% for e in form.phone.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.address.label(class="form-label fw-semibold") }}
+            {{ form.address(class="form-control" + (" is-invalid" if form.address.errors else ""), rows=4, placeholder="Full delivery address with pincode") }}
+            {% for e in form.address.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="checkout-card card p-4 mb-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-wallet2 me-2 text-success"></i>Payment Method</h5>
+          {% for value, label in form.payment_method.choices %}
+          <label class="payment-option d-flex align-items-center gap-3 mb-2 w-100">
+            <input type="radio" name="payment_method" value="{{ value }}"
+                   {% if form.payment_method.data == value %}checked{% endif %}
+                   class="form-check-input mt-0" />
+            <div>
+              {% if value == 'COD' %}
+              <i class="bi bi-cash-coin text-warning fs-5 me-1"></i>
+              {% elif value == 'UPI' %}
+              <i class="bi bi-phone text-primary fs-5 me-1"></i>
+              {% else %}
+              <i class="bi bi-credit-card text-info fs-5 me-1"></i>
+              {% endif %}
+              <strong>{{ label }}</strong>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+
+        {{ form.submit(class="btn btn-success btn-lg w-100 fw-semibold") }}
+      </form>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-lg-5">
+      <div class="cart-summary sticky-top" style="top:90px;">
+        <h5 class="fw-bold mb-3">Order Summary</h5>
+        {% for item in items %}
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <img src="{{ item.product.image_url or 'https://placehold.co/50x50/d8f3dc/2d6a4f?text=P' }}"
+               style="width:50px;height:50px;object-fit:cover;border-radius:8px;" alt="{{ item.product.name }}" />
+          <div class="flex-grow-1">
+            <div class="fw-semibold small">{{ item.product.name }}</div>
+            <small class="text-muted">Qty: {{ item.quantity }}</small>
+          </div>
+          <span class="fw-semibold">₹{{ "%.0f"|format(item.subtotal) }}</span>
+        </div>
+        {% endfor %}
+        <hr />
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Subtotal</span>
+          <span>₹{{ "%.0f"|format(total) }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Delivery</span>
+          {% if total >= 999 %}
+          <span class="text-success fw-semibold">FREE</span>
+          {% else %}
+          <span>₹49</span>
+          {% endif %}
+        </div>
+        <hr />
+        <div class="d-flex justify-content-between">
+          <span class="fw-bold fs-5">Total</span>
+          <span class="cart-total">₹{{ "%.0f"|format(total if total >= 999 else total + 49) }}</span>
+        </div>
+        <div class="mt-3 d-flex align-items-center gap-2 text-muted small">
+          <i class="bi bi-shield-lock-fill text-success"></i>
+          <span>Your payment and personal data are secure.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

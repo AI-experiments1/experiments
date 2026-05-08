@@ -1,4 +1,1 @@
-- 👋 Hi, I’m @divyasharadha
-- 👀 I’m interested in Java, Python
-- 🌱 I’m currently learning Python
-- 💞️ I’m looking to collaborate on Python Programming
+- 👋 Hi, I’m an An enthusiat interested in learning AI technologies.

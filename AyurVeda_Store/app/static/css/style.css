@@ -1,0 +1,169 @@
+/* =============================================
+   AyurVeda Store – Custom Styles
+   ============================================= */
+
+:root {
+  --green-dark:   #1b4332;
+  --green-mid:    #2d6a4f;
+  --green-main:   #40916c;
+  --green-light:  #d8f3dc;
+  --green-pale:   #f0faf4;
+  --text-dark:    #1a1a2e;
+  --font-body:    'Poppins', sans-serif;
+  --font-heading: 'Playfair Display', serif;
+}
+
+/* ---- Global ---- */
+body {
+  font-family: var(--font-body);
+  color: var(--text-dark);
+  background: #fff;
+}
+
+a { color: var(--green-main); text-decoration: none; }
+a:hover { color: var(--green-dark); }
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--green-dark);
+}
+
+/* ---- Top Bar ---- */
+.topbar {
+  background: var(--green-dark);
+  color: #d8f3dc;
+  font-size: 0.82rem;
+}
+
+/* ---- Navbar ---- */
+.navbar { border-bottom: 2px solid var(--green-light); }
+.brand-name { font-family: var(--font-heading); font-size: 1.5rem; color: var(--green-dark); }
+.brand-icon { font-size: 1.6rem; color: var(--green-main); }
+
+.search-form { width: 38%; }
+.search-form .form-control:focus { border-color: var(--green-main); box-shadow: 0 0 0 .2rem rgba(64,145,108,.25); }
+
+.navbar-nav .nav-link { font-weight: 500; transition: color .2s; }
+.navbar-nav .nav-link:hover { color: var(--green-main) !important; }
+
+/* ---- Hero ---- */
+.hero-section {
+  background: linear-gradient(135deg, var(--green-pale) 0%, #fff 60%);
+  padding: 80px 0 60px;
+}
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: 3.2rem;
+  line-height: 1.2;
+  color: var(--green-dark);
+}
+.hero-subtitle { font-size: 1.1rem; max-width: 480px; }
+.hero-stat { background: #fff; border-radius: 12px; padding: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+.hero-stat strong { font-size: 1.6rem; color: var(--green-main); }
+
+/* ---- Category Cards ---- */
+.category-card { transition: transform .25s, box-shadow .25s; border-radius: 16px !important; }
+.category-card:hover { transform: translateY(-6px); box-shadow: 0 12px 32px rgba(45,106,79,.15) !important; }
+.category-icon { font-size: 3.5rem; color: var(--green-main); }
+
+/* ---- Product Cards ---- */
+.product-card { border-radius: 14px !important; transition: transform .25s, box-shadow .25s; overflow: hidden; }
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 28px rgba(0,0,0,.12) !important; }
+.product-img { height: 210px; object-fit: cover; }
+.price { font-size: 1.15rem; font-weight: 700; color: var(--green-main); }
+.original-price { font-size: 0.85rem; }
+.discount-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: #e63946; color: #fff;
+  font-size: 0.75rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px;
+  z-index: 2;
+}
+
+/* ---- Qty Input ---- */
+.qty-input { width: 130px; }
+.qty-input .form-control { font-weight: 600; }
+
+/* ---- Features ---- */
+.feature-box { background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,.06); transition: transform .2s; }
+.feature-box:hover { transform: translateY(-4px); }
+
+/* ---- Newsletter ---- */
+.newsletter-section { background: var(--green-light); border-radius: 24px; margin: 0 16px; }
+
+/* ---- Footer ---- */
+.footer {
+  background: var(--green-dark);
+  color: #b7e4c7;
+}
+.footer h5, .footer h6 { color: #fff; }
+.footer a { color: #b7e4c7; }
+.footer a:hover { color: #fff; }
+.social-links a {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.1);
+  color: #fff; font-size: 1rem; margin-right: 8px;
+  transition: background .2s;
+}
+.social-links a:hover { background: var(--green-main); }
+
+/* ---- Auth Cards ---- */
+.auth-card { border-radius: 20px; border: none; box-shadow: 0 8px 32px rgba(0,0,0,.1); }
+
+/* ---- Cart ---- */
+.cart-item-img { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; }
+.cart-summary { background: var(--green-pale); border-radius: 16px; padding: 24px; border: 1px solid var(--green-light); }
+.cart-total { font-size: 1.6rem; font-weight: 700; color: var(--green-main); }
+
+/* ---- Checkout ---- */
+.checkout-card { border-radius: 16px; border: 1px solid #e9ecef; }
+.payment-option { cursor: pointer; border: 2px solid #dee2e6; border-radius: 10px; padding: 12px 16px; transition: border-color .2s; }
+.payment-option:has(input:checked) { border-color: var(--green-main); background: var(--green-pale); }
+
+/* ---- Order Success ---- */
+.success-icon { font-size: 5rem; color: var(--green-main); }
+.order-success-card { border-radius: 20px; border: none; box-shadow: 0 8px 40px rgba(0,0,0,.1); }
+
+/* ---- Order History ---- */
+.order-status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+.status-pending   { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #cff4fc; color: #055160; }
+.status-shipped   { background: #d1ecf1; color: #0c5460; }
+.status-delivered { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+
+/* ---- Admin ---- */
+.admin-sidebar {
+  background: var(--green-dark);
+  min-height: 100vh;
+  color: #b7e4c7;
+}
+.admin-sidebar .nav-link { color: #b7e4c7; font-weight: 500; border-radius: 8px; transition: background .2s, color .2s; }
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active { background: rgba(255,255,255,.15); color: #fff; }
+.admin-sidebar .nav-link i { width: 20px; }
+
+.stat-card { border-radius: 16px; border: none; box-shadow: 0 2px 16px rgba(0,0,0,.07); transition: transform .2s; }
+.stat-card:hover { transform: translateY(-3px); }
+.stat-icon { font-size: 2.4rem; opacity: .85; }
+
+/* ---- Sidebar product filter ---- */
+.filter-sidebar { background: var(--green-pale); border-radius: 14px; padding: 20px; border: 1px solid var(--green-light); }
+
+/* ---- Pagination ---- */
+.page-link { color: var(--green-main); }
+.page-item.active .page-link { background-color: var(--green-main); border-color: var(--green-main); }
+
+/* ---- Utilities ---- */
+.bg-green-pale { background: var(--green-pale) !important; }
+.text-green-dark { color: var(--green-dark) !important; }
+.rounded-4 { border-radius: 1rem !important; }
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .hero-title { font-size: 2.1rem; }
+  .search-form { width: 100%; }
+  .admin-sidebar { min-height: auto; }
+}
