@@ -1,0 +1,45 @@
+# Credentials & secrets
+.env
+*.env
+.env.*
+secrets.json
+credentials.json
+
+# Database
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Uploads / user-generated files
+app/static/uploads/
+
+# IDE & editor files
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
