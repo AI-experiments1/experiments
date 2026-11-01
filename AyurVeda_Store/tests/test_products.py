@@ -60,3 +60,15 @@ def test_product_detail_valid(app, client):
 
 def test_product_detail_not_found(client):
     assert client.get('/products/99999').status_code == 404
+
+
+def test_inactive_product_detail_hidden(app, client):
+    with app.app_context():
+        pid = Product.query.filter_by(name='Inactive Item').first().id
+    assert client.get(f'/products/{pid}').status_code == 404
+
+
+def test_inactive_product_detail_visible_to_admin(app, admin_client):
+    with app.app_context():
+        pid = Product.query.filter_by(name='Inactive Item').first().id
+    assert admin_client.get(f'/products/{pid}').status_code == 200

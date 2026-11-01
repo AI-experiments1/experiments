@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, abort
+from flask_login import current_user
 from app.models import Product, Category
 
 products = Blueprint('products', __name__)
@@ -41,6 +42,9 @@ def list_products():
 @products.route('/<int:product_id>')
 def detail(product_id):
     product = Product.query.get_or_404(product_id)
+    # Inactive products are hidden from customers (admins can still preview them)
+    if not product.is_active and not (current_user.is_authenticated and current_user.is_admin):
+        abort(404)
     related = Product.query.filter_by(category_id=product.category_id, is_active=True)\
                            .filter(Product.id != product.id).limit(4).all()
     return render_template('products/detail.html', product=product, related=related)

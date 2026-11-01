@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, FloatField, IntegerField, SelectField, BooleanField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange, Optional
+from wtforms.validators import DataRequired, Email, EqualTo, InputRequired, Length, NumberRange, Optional
 
 
 class RegisterForm(FlaskForm):
@@ -31,7 +31,8 @@ class ProductForm(FlaskForm):
     description = TextAreaField('Description', validators=[DataRequired()])
     price = FloatField('Price (₹)', validators=[DataRequired(), NumberRange(min=1)])
     original_price = FloatField('Original Price (₹)', validators=[Optional(), NumberRange(min=1)])
-    stock = IntegerField('Stock', validators=[DataRequired(), NumberRange(min=0)])
+    # InputRequired (not DataRequired) so that a stock of 0 is accepted
+    stock = IntegerField('Stock', validators=[InputRequired(), NumberRange(min=0)])
     unit = StringField('Unit (e.g. 250g, 1L)', validators=[DataRequired()])
     category_id = SelectField('Category', coerce=int, validators=[DataRequired()])
     image_url = StringField('Image URL', validators=[Optional()])
