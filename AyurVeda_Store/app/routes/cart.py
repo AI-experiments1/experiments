@@ -7,6 +7,16 @@ from app.forms import CheckoutForm
 cart = Blueprint('cart', __name__)
 
 
+def _parse_quantity(raw, default=1):
+    """Parse a quantity from form input; return None if it isn't an integer."""
+    if raw is None or raw == '':
+        return default
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
+
+
 @cart.route('/')
 @login_required
 def view_cart():
@@ -19,16 +29,27 @@ def view_cart():
 @login_required
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
-    quantity = int(request.form.get('quantity', 1))
+    back = request.referrer or url_for('products.list_products')
+    if not product.is_active:
+        flash('This product is not available.', 'warning')
+        return redirect(url_for('products.list_products'))
+    quantity = _parse_quantity(request.form.get('quantity'))
+    if quantity is None or quantity < 1:
+        flash('Please enter a valid quantity.', 'warning')
+        return redirect(back)
     item = CartItem.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    new_total = quantity + (item.quantity if item else 0)
+    if new_total > product.stock:
+        flash(f'Sorry, only {product.stock} unit(s) of "{product.name}" are in stock.', 'warning')
+        return redirect(back)
     if item:
-        item.quantity += quantity
+        item.quantity = new_total
     else:
         item = CartItem(user_id=current_user.id, product_id=product_id, quantity=quantity)
         db.session.add(item)
     db.session.commit()
     flash(f'"{product.name}" added to cart!', 'success')
-    return redirect(request.referrer or url_for('products.list_products'))
+    return redirect(back)
 
 
 @cart.route('/update/<int:item_id>', methods=['POST'])
@@ -38,9 +59,15 @@ def update_cart(item_id):
     if item.user_id != current_user.id:
         flash('Unauthorized action.', 'danger')
         return redirect(url_for('cart.view_cart'))
-    quantity = int(request.form.get('quantity', 1))
+    quantity = _parse_quantity(request.form.get('quantity'))
+    if quantity is None:
+        flash('Please enter a valid quantity.', 'warning')
+        return redirect(url_for('cart.view_cart'))
     if quantity <= 0:
         db.session.delete(item)
+    elif quantity > item.product.stock:
+        flash(f'Sorry, only {item.product.stock} unit(s) of "{item.product.name}" are in stock.', 'warning')
+        return redirect(url_for('cart.view_cart'))
     else:
         item.quantity = quantity
     db.session.commit()
@@ -77,6 +104,13 @@ def checkout():
     total = sum(item.subtotal for item in items)
 
     if form.validate_on_submit():
+        unavailable = [i.product.name for i in items
+                       if not i.product.is_active or i.quantity > i.product.stock]
+        if unavailable:
+            flash('Some items are out of stock or unavailable: ' + ', '.join(unavailable)
+                  + '. Please update your cart.', 'danger')
+            return redirect(url_for('cart.view_cart'))
+
         order = Order(
             user_id=current_user.id,
             total=total,
@@ -95,7 +129,7 @@ def checkout():
                 price=item.product.price
             )
             db.session.add(order_item)
-            item.product.stock = max(0, item.product.stock - item.quantity)
+            item.product.stock -= item.quantity
             db.session.delete(item)
 
         db.session.commit()

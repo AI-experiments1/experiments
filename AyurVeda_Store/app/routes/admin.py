@@ -2,10 +2,12 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from functools import wraps
 from app import db
-from app.models import Product, Category, Order, User
+from app.models import Product, Category, Order, User, CartItem
 from app.forms import ProductForm
 
 admin = Blueprint('admin', __name__)
+
+ORDER_STATUSES = ('Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled')
 
 
 def admin_required(f):
@@ -26,7 +28,8 @@ def dashboard():
         'products': Product.query.count(),
         'orders': Order.query.count(),
         'users': User.query.count(),
-        'revenue': db.session.query(db.func.sum(Order.total)).scalar() or 0,
+        'revenue': db.session.query(db.func.sum(Order.total))
+                     .filter(Order.status != 'Cancelled').scalar() or 0,
     }
     recent_orders = Order.query.order_by(Order.created_at.desc()).limit(10).all()
     return render_template('admin/dashboard.html', stats=stats, recent_orders=recent_orders)
@@ -90,6 +93,16 @@ def edit_product(product_id):
 @admin_required
 def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
+    # Remove the product from any shopping carts first
+    CartItem.query.filter_by(product_id=product.id).delete()
+    if product.order_items:
+        # Order history references this product (order_items.product_id is NOT NULL),
+        # so a hard delete would fail. Hide it from customers instead.
+        product.is_active = False
+        product.is_featured = False
+        db.session.commit()
+        flash('Product has existing orders, so it was deactivated instead of deleted.', 'info')
+        return redirect(url_for('admin.products'))
     db.session.delete(product)
     db.session.commit()
     flash('Product deleted.', 'info')
@@ -109,7 +122,21 @@ def orders():
 @admin_required
 def update_order_status(order_id):
     order = Order.query.get_or_404(order_id)
-    order.status = request.form.get('status', order.status)
+    new_status = request.form.get('status', order.status)
+    if new_status not in ORDER_STATUSES:
+        flash('Invalid order status.', 'danger')
+        return redirect(url_for('admin.orders'))
+    if new_status == 'Cancelled' and order.status != 'Cancelled':
+        # Return the reserved stock to inventory
+        for oi in order.items:
+            if oi.product:
+                oi.product.stock += oi.quantity
+    elif order.status == 'Cancelled' and new_status != 'Cancelled':
+        # Re-activating a cancelled order takes the stock again
+        for oi in order.items:
+            if oi.product:
+                oi.product.stock = max(0, oi.product.stock - oi.quantity)
+    order.status = new_status
     db.session.commit()
     flash('Order status updated.', 'success')
     return redirect(url_for('admin.orders'))

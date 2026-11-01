@@ -113,3 +113,62 @@ def test_admin_update_order_status(app, auth_client, admin_client):
                              data={'status': 'Confirmed'}, follow_redirects=True)
     assert resp.status_code == 200
     assert b'status updated' in resp.data.lower()
+
+
+def _place_order(app, auth_client, qty='2'):
+    from app.models import Product as P, Order
+    with app.app_context():
+        pid = P.query.filter_by(name='Ashwagandha Powder').first().id
+    auth_client.post(f'/cart/add/{pid}', data={'quantity': qty})
+    auth_client.post('/cart/checkout', data={
+        'name': 'Test User', 'phone': '9876543210',
+        'address': '123 Test Street, Pune - 411001', 'payment_method': 'COD',
+    })
+    with app.app_context():
+        return pid, Order.query.first().id
+
+
+def test_admin_rejects_invalid_order_status(app, auth_client, admin_client):
+    from app import db
+    from app.models import Order
+    _, oid = _place_order(app, auth_client)
+    resp = admin_client.post(f'/admin/orders/{oid}/status',
+                             data={'status': 'Hacked'}, follow_redirects=True)
+    assert b'invalid order status' in resp.data.lower()
+    with app.app_context():
+        assert db.session.get(Order, oid).status == 'Pending'
+
+
+def test_admin_cancel_order_restores_stock(app, auth_client, admin_client):
+    from app import db
+    from app.models import Product as P
+    pid, oid = _place_order(app, auth_client, qty='2')
+    with app.app_context():
+        assert db.session.get(P, pid).stock == 48
+    admin_client.post(f'/admin/orders/{oid}/status', data={'status': 'Cancelled'})
+    with app.app_context():
+        assert db.session.get(P, pid).stock == 50
+
+
+def test_admin_delete_product_with_orders_deactivates(app, auth_client, admin_client):
+    from app import db
+    from app.models import Product as P
+    pid, _ = _place_order(app, auth_client)
+    resp = admin_client.post(f'/admin/products/delete/{pid}', follow_redirects=True)
+    assert resp.status_code == 200
+    with app.app_context():
+        p = db.session.get(P, pid)
+        assert p is not None and p.is_active is False
+
+
+def test_admin_add_product_with_zero_stock(app, admin_client):
+    from app.models import Category, Product as P
+    with app.app_context():
+        cid = Category.query.first().id
+    admin_client.post('/admin/products/add', data={
+        'name': 'Zero Stock Item', 'description': 'Out of stock for now.',
+        'price': '100', 'stock': '0', 'unit': '1pc', 'category_id': str(cid),
+        'is_active': 'y',
+    })
+    with app.app_context():
+        assert P.query.filter_by(name='Zero Stock Item').first() is not None

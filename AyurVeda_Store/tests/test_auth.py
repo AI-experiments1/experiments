@@ -66,3 +66,30 @@ def test_profile_loads_when_logged_in(auth_client):
 def test_logout(auth_client):
     resp = auth_client.get('/auth/logout', follow_redirects=True)
     assert b'logged out' in resp.data
+
+
+def test_login_rejects_external_next_redirect(client):
+    resp = client.post('/auth/login?next=https://evil.example.com/',
+                       data={'email': 'user@test.com', 'password': 'testpass123'})
+    assert resp.status_code == 302
+    assert 'evil.example.com' not in resp.headers['Location']
+
+
+def test_login_rejects_protocol_relative_next_redirect(client):
+    resp = client.post('/auth/login?next=//evil.example.com/',
+                       data={'email': 'user@test.com', 'password': 'testpass123'})
+    assert resp.status_code == 302
+    assert 'evil.example.com' not in resp.headers['Location']
+
+
+def test_login_allows_relative_next_redirect(client):
+    resp = client.post('/auth/login?next=/cart/',
+                       data={'email': 'user@test.com', 'password': 'testpass123'})
+    assert resp.status_code == 302
+    assert resp.headers['Location'].endswith('/cart/')
+
+
+def test_login_email_case_insensitive(client):
+    resp = client.post('/auth/login',
+                       data={'email': 'USER@test.com', 'password': 'testpass123'})
+    assert resp.status_code == 302
